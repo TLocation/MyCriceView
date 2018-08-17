@@ -59,6 +59,8 @@ public class MyView extends View implements Checkable {
 	private float criceX;
 	private float criceY;
 
+	private Paint backPaint;
+
 
 	/**
 	 * 半径
@@ -72,6 +74,8 @@ public class MyView extends View implements Checkable {
 
 
 	private Paint checkPaint;
+
+	private Paint arcPaint;
 	private float angle;
 
 	private List<Float> lineX;
@@ -114,25 +118,35 @@ public class MyView extends View implements Checkable {
 		pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		pointPaint.setColor(Color.WHITE);
 		pointPaint.setStrokeCap(Paint.Cap.ROUND);
-		pointPaint.setStrokeWidth(20);
+		pointPaint.setStrokeWidth(30);
 		textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		textPaint.setColor(Color.WHITE);
-		textPaint.setTextSize(25);
+		textPaint.setTextSize(40);
 		setBackgroundColor(Color.parseColor("#14345E"));
 		checkPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		checkPaint.setColor(COLOR_CHECK_OUTSIDE);
 		checkPaint.setStyle(Paint.Style.FILL);
+
+		arcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		arcPaint.setColor(Color.RED);
+		arcPaint.setStyle(Paint.Style.STROKE);
+		arcPaint.setStrokeWidth(10);
+		backPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		backPaint.setColor(Color.BLUE);
+
 
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+
 		lineY.clear();
 		lineX.clear();
 		radioData.clear();
 		width = getWidth();
 		height = getHeight();
+
 		int top = getPaddingTop();
 		int bottom = getPaddingBottom();
 		int left = getPaddingLeft();
@@ -141,8 +155,10 @@ public class MyView extends View implements Checkable {
 		criceX = left + radios;
 		criceY = top + radios;
 		radios = radios - 100;
-
+		canvas.drawRect(new RectF(0,0,height,radios+top+100),backPaint);
+		canvas.drawCircle(criceX,criceY,radios+100+left,backPaint);
 		canvas.drawCircle(criceX, criceY, radios, paint);
+
 		angle = 360 / 24;
 		float xAngle = angle;
 		float xradios = radios + 20;
@@ -160,6 +176,20 @@ public class MyView extends View implements Checkable {
 
 		for (int i = 0; i < data.size(); i++) {
 			index++;
+			String message = data.get(i);
+			Rect rect = new Rect();
+			textPaint.getTextBounds(message, 0, message.length(), rect);
+			/**
+			 *  内圆半径+20偏移量+文字高度+文字偏移量/2
+			 *  计算x轴和y轴
+			 */
+			float raidoX = getRaidoX(radios + 50 + (rect.height())/2, xAngle);
+			float raidoY = getRaidoY(radios + 50 + (rect.height())/2, xAngle);
+			float checkRadios = rect.width()/2;
+			checkPaint.setColor(COLOR_CHECK_OUTSIDE);
+			canvas.drawCircle(raidoX,raidoY,checkRadios+20,checkPaint);
+			checkPaint.setColor(COLOR_CHECK_INTER);
+			canvas.drawCircle(raidoX,raidoY,checkRadios+10,checkPaint);
 			float x = (float) (criceX + xradios * Math.cos(xAngle * PI / 180));
 			float y = (float) (criceY + xradios * Math.sin(xAngle * PI / 180));
 			float pointx = (float) (criceX + m * Math.cos(xAngle * PI / 180));
@@ -183,26 +213,18 @@ public class MyView extends View implements Checkable {
 			LogUtils.d("radiodata===>" + radioData.toString());
 			this.radioData.add(radioData);
 			canvas.drawPath(path, paint);
+//			canvas.rotate(90);
 			canvas.drawTextOnPath(data.get(i), path, 0, 0, textPaint);
-			String message = "你好";
-			Rect rect = new Rect();
-			textPaint.getTextBounds(message, 0, message.length(), rect);
+
 			/**
 			 * 50  偏移量  内圆半径到文字底部的偏移量
 			 */
 			aFloat = radios + 50 + rect.height();
 			canvas.drawCircle(criceX, criceY, aFloat, paint);
-			float raidoX = getRaidoX(radios + 20 + (rect.height() + 30)/2, xAngle);
-			float raidoY = getRaidoY(radios + 20 + (rect.height() + 30)/2, xAngle);
-			checkPaint.setColor(COLOR_CHECK_OUTSIDE);
-			canvas.drawCircle(raidoX,raidoY,35,checkPaint);
-			checkPaint.setColor(COLOR_CHECK_INTER);
-			canvas.drawCircle(raidoX,raidoY,30,checkPaint);
 			canvas.drawLine(criceX, criceY, x, y, paint);
 			canvas.drawPoint(pointx, pointY, pointPaint);
 			xAngle += angle;
 			arcradios += angle;
-
 			if (add) {
 				m += pointMar;
 			} else {
@@ -220,6 +242,7 @@ public class MyView extends View implements Checkable {
 				m = radios;
 			}
 		}
+		canvas.drawArc(new RectF(criceX-radios,criceY-radios,radios+criceX,radios+criceY),135,90,false,arcPaint);
 
 
 //		textPaint.measureText()
