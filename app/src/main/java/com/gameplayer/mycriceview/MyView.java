@@ -134,7 +134,7 @@ public class MyView extends View implements Checkable {
 		textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		textPaint.setColor(typedArray.getColor(R.styleable.CriceView_textColor, Color.WHITE));
 		textPaint.setTextSize(typedArray.getDimensionPixelSize(R.styleable.CriceView_textSize, 30));
-		setBackgroundColor(Color.parseColor("#14345E"));
+//		setBackgroundColor(Color.parseColor("#14345E"));
 		checkPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		checkPaint.setColor(COLOR_CHECK_OUTSIDE);
 		checkPaint.setStyle(Paint.Style.FILL);
@@ -195,7 +195,7 @@ public class MyView extends View implements Checkable {
 		criceY = top + radios;
 		radios = radios - allOffset-contentWith;
 		canvas.drawRect(new RectF(0, 0, height, radios + top + allOffset+contentWith), backPaint);
-		canvas.drawCircle(criceX, criceY, width/2+criceOffset  , backPaint);
+		canvas.drawCircle(criceX, criceY+40, width/2+criceOffset  , backPaint);
 		canvas.drawCircle(criceX, criceY, radios, paint);
 
 		//平分圆
