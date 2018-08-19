@@ -15,7 +15,17 @@
 
 <com.gameplayer.mycriceview.MyView
 	android:padding="10dp"
-
+     app:themeColor="#14ef11"
+	app:lineWith="3dp"
+app:textSize="16sp"
+	app:textColor="#ea13dc"
+	app:pointSize="10dp"
+	app:arcColor="#d5fa03"
+	app:arcWidth="5dp"
+	app:lineOffset="15dp"
+	app:textOffset="20dp"
+	app:contentWidth="15dp"
+	app:criceOffset="8dp"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"></com.gameplayer.mycriceview.MyView>
 

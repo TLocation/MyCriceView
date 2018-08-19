@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<declare-styleable name="CriceView">
+		<!--主题颜色  线  圆点  半径圆所使用的颜色-->
+		<attr name="themeColor" format="color"/>
+		<!--线的宽度 作用于  内圆 线-->
+		<attr name="lineWith" format="dimension"/>
+		<!--文字大小  单位sp-->
+		<attr name="textSize" format="dimension"/>
+		<!--文字颜色-->
+		<attr name="textColor" format="color"/>
+		<!--圆点大小-->
+		<attr name="pointSize" format="dimension"/>
+		<!--线到内圆的偏移量-->
+		<attr name="lineOffset" format="dimension"/>
+		<!--文字到线的偏移量-->
+		<attr name="textOffset" format="dimension"/>
+		<!--圆弧的颜色-->
+		<attr name="arcColor" format="color"/>
+		<!--圆弧宽度-->
+		<attr name="arcWidth" format="dimension"/>
+		<!--内容高度-->
+		<attr name="contentWidth" format="dimension"/>
+		<!--最外面圆的半径 = 宽的一半+criceOffset-->
+		<attr name="criceOffset" format="dimension"/>
+	</declare-styleable>
+</resources>

@@ -1,42 +1,51 @@
 package com.gameplayer.mycriceview;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Region;
+import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Checkable;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static java.lang.Math.round;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * 项目:趣租部落
  *
  * @author：location time：2018/7/27 14:30
  * description：
- *
- *
+ * <p>
+ * <p>
  * 关于文字选择半径
  * 应该是  文字宽度&高的一半选取偏移量
  * 同时  给定 绘制方向      文字绘制靠后
- *
  */
 
 public class MyView extends View implements Checkable {
 
+	 private int criceOffset;
+	private int lineOffset;
+	private int textOffset;
 
+	private int allOffset;
+
+	private int contentWith;
+	private boolean isToday;
 	private final int COLOR_CHECK_INTER = Color.parseColor("#02FD60");
 	private final int COLOR_CHECK_OUTSIDE = Color.parseColor("#5EAEFF");
 	private static final int PART_ONE = 1;
@@ -94,6 +103,7 @@ public class MyView extends View implements Checkable {
 
 	private float aFloat;
 	private final float PI = 3.1415f;
+	private String FORMAT = "yyyy-MM-dd";
 
 	public MyView(Context context) {
 		this(context, null);
@@ -108,38 +118,64 @@ public class MyView extends View implements Checkable {
 		data = new ArrayList<>();
 		String[] stringArray = context.getResources().getStringArray(R.array.data);
 		data.addAll(Arrays.asList(stringArray));
+		TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CriceView);
+
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setStyle(Paint.Style.STROKE);
-		paint.setColor(Color.WHITE);
-		paint.setStrokeWidth(3);
+		paint.setColor(typedArray.getColor(R.styleable.CriceView_themeColor, Color.WHITE));
+		paint.setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CriceView_lineWith, 3));
 		lineX = new ArrayList<>();
 		lineY = new ArrayList<>();
 		radioData = new ArrayList<>();
 		pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		pointPaint.setColor(Color.WHITE);
+		pointPaint.setColor(typedArray.getColor(R.styleable.CriceView_themeColor, Color.WHITE));
 		pointPaint.setStrokeCap(Paint.Cap.ROUND);
-		pointPaint.setStrokeWidth(30);
+		pointPaint.setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CriceView_pointSize, 30));
 		textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		textPaint.setColor(Color.WHITE);
-		textPaint.setTextSize(40);
+		textPaint.setColor(typedArray.getColor(R.styleable.CriceView_textColor, Color.WHITE));
+		textPaint.setTextSize(typedArray.getDimensionPixelSize(R.styleable.CriceView_textSize, 30));
 		setBackgroundColor(Color.parseColor("#14345E"));
 		checkPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		checkPaint.setColor(COLOR_CHECK_OUTSIDE);
 		checkPaint.setStyle(Paint.Style.FILL);
 
 		arcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		arcPaint.setColor(Color.RED);
+		arcPaint.setColor(typedArray.getColor(R.styleable.CriceView_arcColor, Color.RED));
 		arcPaint.setStyle(Paint.Style.STROKE);
-		arcPaint.setStrokeWidth(10);
+		arcPaint.setStrokeWidth(typedArray.getDimensionPixelSize(R.styleable.CriceView_arcWidth, 10));
 		backPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		backPaint.setColor(Color.BLUE);
-
+		lineOffset = typedArray.getDimensionPixelSize(R.styleable.CriceView_lineOffset,20);
+		textOffset = typedArray.getDimensionPixelSize(R.styleable.CriceView_textOffset, 30);
+		contentWith  = typedArray.getDimensionPixelSize(R.styleable.CriceView_contentWidth,50);
+		allOffset = lineOffset+textOffset;
+		criceOffset = typedArray.getDimensionPixelSize(R.styleable.CriceView_criceOffset,50);
+		typedArray.recycle();
 
 	}
 
+	@RequiresApi(api = Build.VERSION_CODES.N)
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		SimpleDateFormat format = new SimpleDateFormat(FORMAT);
+		TestCaleand testCaleand = new TestCaleand();
+		//24节气
+		TreeMap<Long, String> invs = testCaleand.JQtest(2018);
+		String iString = "ceshi";
+		long getdays = getdays();
+		Set<Long> inks = invs.keySet();
+		for (Long ink : inks) {
+			Long aLong = ink;
+			if (aLong.longValue() == getdays || aLong.longValue() > getdays) {
+				if (aLong.longValue() == getdays) {
+					isToday = true;
+				}
+				iString = invs.get(ink);
+				break;
+			}
+		}
+		LogUtils.d("节气===>" + iString);
 
 		lineY.clear();
 		lineX.clear();
@@ -147,6 +183,9 @@ public class MyView extends View implements Checkable {
 		width = getWidth();
 		height = getHeight();
 
+		/**
+		 * 获取内边距
+		 */
 		int top = getPaddingTop();
 		int bottom = getPaddingBottom();
 		int left = getPaddingLeft();
@@ -154,50 +193,81 @@ public class MyView extends View implements Checkable {
 		radios = (width - (left + right)) / 2;
 		criceX = left + radios;
 		criceY = top + radios;
-		radios = radios - 100;
-		canvas.drawRect(new RectF(0,0,height,radios+top+100),backPaint);
-		canvas.drawCircle(criceX,criceY,radios+100+left,backPaint);
+		radios = radios - allOffset-contentWith;
+		canvas.drawRect(new RectF(0, 0, height, radios + top + allOffset+contentWith), backPaint);
+		canvas.drawCircle(criceX, criceY, width/2+criceOffset  , backPaint);
 		canvas.drawCircle(criceX, criceY, radios, paint);
 
+		//平分圆
 		angle = 360 / 24;
+		//当前节日所需要划过的角度
 		float xAngle = angle;
-		float xradios = radios + 20;
+		/**
+		 * 外接线的模拟圆
+		 *
+		 */
+		float xradios = radios + lineOffset;
+
+		/**
+		 * 半径上最多画13点  每个点的间距
+		 * 用于太极
+		 */
 		float pointMar = radios / 13;
 		float m = pointMar * 6;
 		boolean add = false;
+		//起始点  用于太极计算
 		int index = 0;
+
+		//用于太极
 		boolean isfoce = true;
-		String text = "夏至";
-		float v3 = textPaint.measureText(text);
-		//滑动的角度
-		float ange = (float) (180 * v3 / (PI * (radios + 50)));
+
+
 		float arcradios = 0;
 
-
+		//圆弧  划过的角度
+		float arcAnge = 0;
 		for (int i = 0; i < data.size(); i++) {
 			index++;
 			String message = data.get(i);
+			//粗略计算出字体的角度
+			float v3 = textPaint.measureText(message);
+			//滑动的角度
+			float ange = (float) (180 * v3 / (PI * (radios +lineOffset+textOffset)));
 			Rect rect = new Rect();
+			//计算文字的宽高
 			textPaint.getTextBounds(message, 0, message.length(), rect);
 			/**
-			 *  内圆半径+20偏移量+文字高度+文字偏移量/2
+			 *  内圆半径+偏移量+文字高度+文字偏移量/2
 			 *  计算x轴和y轴
+			 *  基于文字的外接圆
 			 */
-			float raidoX = getRaidoX(radios + 50 + (rect.height())/2, xAngle);
-			float raidoY = getRaidoY(radios + 50 + (rect.height())/2, xAngle);
-			float checkRadios = rect.width()/2;
-			checkPaint.setColor(COLOR_CHECK_OUTSIDE);
-			canvas.drawCircle(raidoX,raidoY,checkRadios+20,checkPaint);
-			checkPaint.setColor(COLOR_CHECK_INTER);
-			canvas.drawCircle(raidoX,raidoY,checkRadios+10,checkPaint);
-			float x = (float) (criceX + xradios * Math.cos(xAngle * PI / 180));
-			float y = (float) (criceY + xradios * Math.sin(xAngle * PI / 180));
-			float pointx = (float) (criceX + m * Math.cos(xAngle * PI / 180));
-			float pointY = (float) (criceY + m * Math.sin(xAngle * PI / 180));
-			lineX.add(x);
-			lineY.add(y);
+			float raidoX = getRaidoX(radios + allOffset + (rect.height()) / 2, xAngle);
+			float raidoY = getRaidoY(radios + allOffset + (rect.height()) / 2, xAngle);
+			//合适的半径
+			float checkRadios = rect.width() / 2;
+			/**
+			 * 绘制选中效果
+			 */
+			if (iString.equals(message)) {
+				if (xAngle > angle * 9) {
+					arcAnge = xAngle - angle * 9;
+				} else {
+					arcAnge = xAngle + angle * 15;
+				}
+				/**
+				 * 画选中效果
+				 */
+				if (isToday) {
+					checkPaint.setColor(COLOR_CHECK_OUTSIDE);
+					canvas.drawCircle(raidoX, raidoY, checkRadios + 20, checkPaint);
+					checkPaint.setColor(COLOR_CHECK_INTER);
+					canvas.drawCircle(raidoX, raidoY, checkRadios + 10, checkPaint);
+				}
+
+			}
+
 			Path path = new Path();
-			RectF rectF = new RectF(criceX - radios - 50, criceY - radios - 50, criceX + radios + 50, criceY + radios + 50);
+			RectF rectF = new RectF(criceX - radios - allOffset, criceY - radios - allOffset, criceX + radios + allOffset, criceY + radios + allOffset);
 			float textStartAnge = xAngle - ange / 2;
 			path.addArc(rectF, textStartAnge, ange);
 			path.close();
@@ -212,15 +282,59 @@ public class MyView extends View implements Checkable {
 			}
 			LogUtils.d("radiodata===>" + radioData.toString());
 			this.radioData.add(radioData);
-			canvas.drawPath(path, paint);
-//			canvas.rotate(90);
-			canvas.drawTextOnPath(data.get(i), path, 0, 0, textPaint);
 
 			/**
-			 * 50  偏移量  内圆半径到文字底部的偏移量
+			 * 在此数值下的画布旋转180
+			 * 为了让文字找到合适的显示角度
 			 */
-			aFloat = radios + 50 + rect.height();
-			canvas.drawCircle(criceX, criceY, aFloat, paint);
+			switch (i) {
+				case 23:
+				case 0:
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 6:
+				case 7:
+				case 8:
+				case 9:
+					//保存当前的画布状态
+					canvas.save();
+					//以文字的中心旋转180度
+					canvas.rotate(180, raidoX, raidoY);
+					//画文字
+					canvas.drawTextOnPath(data.get(i), path, 0, 0, textPaint);
+					//绘制完毕  恢复状态
+					canvas.restore();
+					break;
+				default:
+					canvas.drawTextOnPath(data.get(i), path, 0, 0, textPaint);
+			}
+
+
+			/**
+			 *   偏移量  内圆半径到文字底部的偏移量
+			 */
+			aFloat = radios + allOffset + rect.height();
+			//最外边的测试圆
+//			canvas.drawCircle(criceX, criceY, aFloat, paint);
+
+			/**
+			 * 获取连线的结束的x点y点
+			 */
+			float x = (float) (criceX + xradios * Math.cos(xAngle * PI / 180));
+			float y = (float) (criceY + xradios * Math.sin(xAngle * PI / 180));
+			/**
+			 * 获取 圆点的位置
+			 */
+			float pointx = (float) (criceX + m * Math.cos(xAngle * PI / 180));
+			float pointY = (float) (criceY + m * Math.sin(xAngle * PI / 180));
+			lineX.add(x);
+			lineY.add(y);
+			/**
+			 * 绘制线和圆点
+			 */
 			canvas.drawLine(criceX, criceY, x, y, paint);
 			canvas.drawPoint(pointx, pointY, pointPaint);
 			xAngle += angle;
@@ -242,42 +356,52 @@ public class MyView extends View implements Checkable {
 				m = radios;
 			}
 		}
-		canvas.drawArc(new RectF(criceX-radios,criceY-radios,radios+criceX,radios+criceY),135,90,false,arcPaint);
+		LogUtils.d("arcange===>" + arcAnge);
+		/**
+		 * 绘制最近的节气 或者当前节气所经过的圆弧
+		 */
+		canvas.drawArc(new RectF(criceX - radios, criceY - radios, radios + criceX, radios + criceY), 135, arcAnge, false, arcPaint);
 
 
-//		textPaint.measureText()
-//		Path path = new Path();
-//		path.addCircle(criceX,criceY,radios+50, Path.Direction.CW);
-//		canvas.drawTextOnPath(builder.toString(),path,0,0,textPaint);
-//
-//		int x = (int) (300 + 150 * cos(90 * 3.14 / 180));
-//
-//		int y = (int) (300 + 150 * sin(90 * 3.14 / 180));
-//		canvas.drawLine(300, 300, x, y, paint);
-//		int x1 = (int) (300 + 150 * cos(45 * 3.14 / 180));
-//
-//		int y1 = (int) (300 + 150 * sin(45 * 3.14 / 180));
-//		canvas.drawLine(300, 300, x, y, paint);
-//		canvas.drawLine(300, 300, x1, y1, paint);
+	}
+
+	/**
+	 * 获取今天的日子
+	 *
+	 * @return
+	 */
+	private long getdays() {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		long l = System.currentTimeMillis();
+		try {
+			return format.parse("2018-08-23").getTime();
+//			return format.parse(format.format(new Date(l))).getTime();
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return 0;
+		}
 	}
 
 	/**
 	 * 获取圆内一点的x点
+	 *
 	 * @param radios
 	 * @param ange
 	 * @return
 	 */
-	private float getRaidoX(float radios,float ange){
+	private float getRaidoX(float radios, float ange) {
 		float x = (float) (criceX + radios * Math.cos(ange * PI / 180));
 		return x;
 	}
+
 	/**
 	 * 获取圆内一点的y点
+	 *
 	 * @param radios
 	 * @param ange
 	 * @return
 	 */
-	private float getRaidoY(float radios,float ange){
+	private float getRaidoY(float radios, float ange) {
 		float y = (float) (criceY + radios * Math.sin(ange * PI / 180));
 		return y;
 	}
@@ -298,26 +422,6 @@ public class MyView extends View implements Checkable {
 			alfa = getRotationBetweenLines(criceX, criceY, x, y);
 			LogUtils.d("夹角===》" + alfa);
 
-//			ToastUtils.showShort("成功");
-//			int i = touchOnWhichPart(event);
-//			switch (i) {
-//				case PART_ONE:
-//					alfa = Math.atan2(x - aFloat, aFloat - y) * 180 / PI;
-//					break;
-//				case PART_TWO:
-//					alfa = Math.atan2(y - aFloat, x - aFloat) * 180 / PI + 90;
-//					break;
-//				case PART_THREE:
-//					alfa = Math.atan2(aFloat - x, y - aFloat) * 180 / PI + 180;
-//					break;
-//				case PART_FOUR:
-//					alfa = Math.atan2(aFloat - y, aFloat - x) * 180 / PI + 270;
-//					break;
-//
-//				default:
-//					break;
-//			}
-//			alfa-=8;
 			if (alfa - 90 > 0) {
 				alfa -= 90;
 			} else {
