@@ -1,5 +1,6 @@
 package com.gameplayer.mycriceview;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -26,12 +27,11 @@ import static java.lang.Math.round;
  *
  * @author：location time：2018/7/27 14:30
  * description：
- *
- *
+ * <p>
+ * <p>
  * 关于文字选择半径
  * 应该是  文字宽度&高的一半选取偏移量
  * 同时  给定 绘制方向      文字绘制靠后
- *
  */
 
 public class MyView extends View implements Checkable {
@@ -155,8 +155,8 @@ public class MyView extends View implements Checkable {
 		criceX = left + radios;
 		criceY = top + radios;
 		radios = radios - 100;
-		canvas.drawRect(new RectF(0,0,height,radios+top+100),backPaint);
-		canvas.drawCircle(criceX,criceY,radios+100+left,backPaint);
+		canvas.drawRect(new RectF(0, 0, height, radios + top + 100), backPaint);
+		canvas.drawCircle(criceX, criceY, radios + 100 + left, backPaint);
 		canvas.drawCircle(criceX, criceY, radios, paint);
 
 		angle = 360 / 24;
@@ -183,13 +183,13 @@ public class MyView extends View implements Checkable {
 			 *  内圆半径+20偏移量+文字高度+文字偏移量/2
 			 *  计算x轴和y轴
 			 */
-			float raidoX = getRaidoX(radios + 50 + (rect.height())/2, xAngle);
-			float raidoY = getRaidoY(radios + 50 + (rect.height())/2, xAngle);
-			float checkRadios = rect.width()/2;
+			float raidoX = getRaidoX(radios + 50 + (rect.height()) / 2, xAngle);
+			float raidoY = getRaidoY(radios + 50 + (rect.height()) / 2, xAngle);
+			float checkRadios = rect.width() / 2;
 			checkPaint.setColor(COLOR_CHECK_OUTSIDE);
-			canvas.drawCircle(raidoX,raidoY,checkRadios+20,checkPaint);
+			canvas.drawCircle(raidoX, raidoY, checkRadios + 20, checkPaint);
 			checkPaint.setColor(COLOR_CHECK_INTER);
-			canvas.drawCircle(raidoX,raidoY,checkRadios+10,checkPaint);
+			canvas.drawCircle(raidoX, raidoY, checkRadios + 10, checkPaint);
 			float x = (float) (criceX + xradios * Math.cos(xAngle * PI / 180));
 			float y = (float) (criceY + xradios * Math.sin(xAngle * PI / 180));
 			float pointx = (float) (criceX + m * Math.cos(xAngle * PI / 180));
@@ -214,8 +214,11 @@ public class MyView extends View implements Checkable {
 			this.radioData.add(radioData);
 			canvas.drawPath(path, paint);
 //			canvas.rotate(90);
-			canvas.drawTextOnPath(data.get(i), path, 0, 0, textPaint);
+			canvas.save();
+			canvas.rotate(180, raidoX, raidoY);
 
+			canvas.drawTextOnPath(data.get(i), path, 0, 0, textPaint);
+			canvas.restore();
 			/**
 			 * 50  偏移量  内圆半径到文字底部的偏移量
 			 */
@@ -241,8 +244,9 @@ public class MyView extends View implements Checkable {
 				add = false;
 				m = radios;
 			}
+
 		}
-		canvas.drawArc(new RectF(criceX-radios,criceY-radios,radios+criceX,radios+criceY),135,90,false,arcPaint);
+		canvas.drawArc(new RectF(criceX - radios, criceY - radios, radios + criceX, radios + criceY), 135, 90, false, arcPaint);
 
 
 //		textPaint.measureText()
@@ -263,21 +267,24 @@ public class MyView extends View implements Checkable {
 
 	/**
 	 * 获取圆内一点的x点
+	 *
 	 * @param radios
 	 * @param ange
 	 * @return
 	 */
-	private float getRaidoX(float radios,float ange){
+	private float getRaidoX(float radios, float ange) {
 		float x = (float) (criceX + radios * Math.cos(ange * PI / 180));
 		return x;
 	}
+
 	/**
 	 * 获取圆内一点的y点
+	 *
 	 * @param radios
 	 * @param ange
 	 * @return
 	 */
-	private float getRaidoY(float radios,float ange){
+	private float getRaidoY(float radios, float ange) {
 		float y = (float) (criceY + radios * Math.sin(ange * PI / 180));
 		return y;
 	}
