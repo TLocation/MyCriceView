@@ -3,7 +3,7 @@
 	<string-array name="data">
 
 
-		<item>白露</item>
+		<item>寒露</item>
 		<item>处暑</item>
 		<item>立秋</item>
 		<item>大暑</item>
@@ -25,7 +25,7 @@
 		<item>小雪</item>
 		<item>立冬</item>
 		<item>霜降</item>
-		<item>寒露</item>
+		<item>白露</item>
 		<item>秋分</item>
 
 	</string-array>

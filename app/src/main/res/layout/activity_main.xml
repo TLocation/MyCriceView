@@ -1,22 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
-	android:orientation="vertical"
 	android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:background="@drawable/bg"
 	tools:context="com.gameplayer.mycriceview.MainActivity">
 
 
-<!--<com.gameplayer.mycriceview.MyView-->
-<!--android:padding="20dp"-->
+	<!--<com.gameplayer.mycriceview.MyView-->
+	<!--android:padding="20dp"-->
 	<!--android:layout_width="match_parent"-->
 	<!--android:layout_height="match_parent" />-->
+	<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="250dp"
+		>
 
-<com.gameplayer.mycriceview.MyView
-	android:padding="10dp"
+		<ImageView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:src="@drawable/time_text" />
 
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"></com.gameplayer.mycriceview.MyView>
+	</RelativeLayout>
 
-</LinearLayout>
+	<RelativeLayout
+		android:id="@+id/mRelative1"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+		<com.gameplayer.mycriceview.MyView
+			android:layout_width="match_parent"
+			android:layout_height="400dp"
+			android:padding="5dp"
+			app:arcColor="#d5fa03"
+			app:arcWidth="5dp"
+			app:contentWidth="15dp"
+			app:criceOffset="15dp"
+			app:lineOffset="15dp"
+			app:lineWith="1dp"
+			app:pointSize="10dp"
+			app:textColor="#fff"
+			app:textOffset="5dp"
+			app:textSize="12sp"
+			app:themeColor="#fff"
+			></com.gameplayer.mycriceview.MyView>
+
+		<ImageView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerInParent="true"
+			android:src="@mipmap/ic_launcher"
+
+			/>
+
+
+	</RelativeLayout>
+
+
+
+</RelativeLayout>
