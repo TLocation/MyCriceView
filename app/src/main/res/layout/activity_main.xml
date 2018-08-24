@@ -13,18 +13,18 @@
 	<!--android:padding="20dp"-->
 	<!--android:layout_width="match_parent"-->
 	<!--android:layout_height="match_parent" />-->
-	<RelativeLayout
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="250dp"
-		>
+	<!--<RelativeLayout-->
+		<!--android:layout_width="match_parent"-->
+		<!--android:layout_height="wrap_content"-->
+		<!--android:layout_marginTop="250dp"-->
+		<!--&gt;-->
 
-		<ImageView
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:src="@drawable/time_text" />
+		<!--<ImageView-->
+			<!--android:layout_width="match_parent"-->
+			<!--android:layout_height="wrap_content"-->
+			<!--android:src="@drawable/time_text" />-->
 
-	</RelativeLayout>
+	<!--</RelativeLayout>-->
 
 	<RelativeLayout
 		android:id="@+id/mRelative1"
@@ -33,7 +33,7 @@
 
 		<com.gameplayer.mycriceview.MyView
 			android:layout_width="match_parent"
-			android:layout_height="400dp"
+			android:layout_height="wrap_content"
 			android:padding="5dp"
 			app:arcColor="#d5fa03"
 			app:arcWidth="5dp"
@@ -46,6 +46,7 @@
 			app:textOffset="5dp"
 			app:textSize="12sp"
 			app:themeColor="#fff"
+			app:vacanyOffset="40dp"
 			></com.gameplayer.mycriceview.MyView>
 
 		<ImageView
