@@ -27,7 +27,6 @@
 		<attr name="vacanyOffset" format="dimension" />
 		<!--最外圆的间距-->
 		<attr name="vacanyAnge" format="float"/>
-		<!--最外圆的起始角度-->
-		<attr name="vacanyStartAnge" format="float"/>
+
 	</declare-styleable>
 </resources>

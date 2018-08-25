@@ -58,10 +58,7 @@ public class CircleView extends View implements Checkable {
 	 */
 	private float vacanyAnge;
 
-	/**
-	 * 起始角度
-	 */
-	private float vacanyStartAnge;
+
 
 
 	private int criceOffset;
@@ -187,7 +184,6 @@ public class CircleView extends View implements Checkable {
 		criceOffset = typedArray.getDimensionPixelSize(R.styleable.CriceView_criceOffset, 50);
 		vacanyOffset = typedArray.getDimensionPixelSize(R.styleable.CriceView_vacanyOffset, 50);
 		vacanyAnge = typedArray.getFloat(R.styleable.CriceView_vacanyAnge, 14f);
-		vacanyStartAnge = typedArray.getFloat(R.styleable.CriceView_vacanyStartAnge, 15f);
 		typedArray.recycle();
 
 	}
