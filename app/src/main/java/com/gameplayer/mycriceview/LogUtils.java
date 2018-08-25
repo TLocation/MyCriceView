@@ -75,6 +75,7 @@ public class LogUtils {
 
 
     private static String getClassName() {
+
         String result;
         StackTraceElement thisMethodStack = (new Exception()).getStackTrace()[3];
         result = thisMethodStack.getClassName();

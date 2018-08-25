@@ -30,4 +30,21 @@
 
 	</string-array>
 
+	<string-array name="hours">
+
+		<item>子时</item>
+		<item>丑时</item>
+		<item>寅时</item>
+		<item>卯时</item>
+		<item>辰时</item>
+		<item>巳时</item>
+		<item>午时</item>
+		<item>未时</item>
+		<item>申时</item>
+		<item>酉时</item>
+		<item>戊时</item>
+		<item>亥时</item>
+
+	</string-array>
+
 </resources>

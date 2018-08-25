@@ -6,8 +6,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Region;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -16,10 +18,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Checkable;
 
+import java.security.cert.PolicyNode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -36,7 +40,29 @@ import java.util.TreeMap;
  * 同时  给定 绘制方向      文字绘制靠后
  */
 
-public class MyView extends View implements Checkable {
+public class CircleView extends View implements Checkable {
+
+	private List<String> hourList;
+
+
+	private CircleClickListener listener;
+	private Region region;
+
+
+	public void setOnItemListener(CircleClickListener listener) {
+		this.listener = listener;
+	}
+
+	/**
+	 * 分割度数
+	 */
+	private float vacanyAnge;
+
+	/**
+	 * 起始角度
+	 */
+	private float vacanyStartAnge;
+
 
 	private int criceOffset;
 	private int lineOffset;
@@ -111,19 +137,22 @@ public class MyView extends View implements Checkable {
 	private final float PI = 3.1415f;
 	private String FORMAT = "yyyy-MM-dd";
 
-	public MyView(Context context) {
+	public CircleView(Context context) {
 		this(context, null);
 	}
 
-	public MyView(Context context, @Nullable AttributeSet attrs) {
+	public CircleView(Context context, @Nullable AttributeSet attrs) {
 		this(context, attrs, 0);
 	}
 
-	public MyView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+	public CircleView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		data = new ArrayList<>();
 		String[] stringArray = context.getResources().getStringArray(R.array.data);
 		data.addAll(Arrays.asList(stringArray));
+		hourList = new ArrayList<>();
+		String[] horsString = context.getResources().getStringArray(R.array.hours);
+		hourList.addAll(Arrays.asList(horsString));
 		TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CriceView);
 
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -157,6 +186,8 @@ public class MyView extends View implements Checkable {
 		allOffset = lineOffset + textOffset;
 		criceOffset = typedArray.getDimensionPixelSize(R.styleable.CriceView_criceOffset, 50);
 		vacanyOffset = typedArray.getDimensionPixelSize(R.styleable.CriceView_vacanyOffset, 50);
+		vacanyAnge = typedArray.getFloat(R.styleable.CriceView_vacanyAnge, 14f);
+		vacanyStartAnge = typedArray.getFloat(R.styleable.CriceView_vacanyStartAnge, 15f);
 		typedArray.recycle();
 
 	}
@@ -206,6 +237,7 @@ public class MyView extends View implements Checkable {
 		 * 8/24  采用覆盖画法  后续需使用drawArc
 		 */
 		drawVacany(canvas);
+
 		canvas.drawRect(new RectF(0, 0, width, radios + top + allOffset + contentWith), backPaint);
 		canvas.drawCircle(criceX, criceY + 40, extenrlRadios, backPaint);
 		canvas.drawCircle(criceX, criceY, radios, paint);
@@ -239,6 +271,8 @@ public class MyView extends View implements Checkable {
 		//圆弧  划过的角度
 		float arcAnge = 0;
 		for (int i = 0; i < data.size(); i++) {
+
+			boolean isday = false;
 			index++;
 			String message = data.get(i);
 			//粗略计算出字体的角度
@@ -261,6 +295,7 @@ public class MyView extends View implements Checkable {
 			 * 绘制选中效果
 			 */
 			if (iString.equals(message)) {
+				isday = false;
 				if (xAngle > angle * 9) {
 					arcAnge = xAngle - angle * 9;
 				} else {
@@ -274,8 +309,11 @@ public class MyView extends View implements Checkable {
 					canvas.drawCircle(raidoX, raidoY, checkRadios + 20, checkPaint);
 					checkPaint.setColor(COLOR_CHECK_INTER);
 					canvas.drawCircle(raidoX, raidoY, checkRadios + 10, checkPaint);
+					isday = true;
 				}
 
+			} else {
+				isday = false;
 			}
 
 			Path path = new Path();
@@ -292,6 +330,8 @@ public class MyView extends View implements Checkable {
 			if ((textStartAnge + ange) > 360) {
 				radioData.setFlag(true);
 			}
+			radioData.setPosition(i);
+			radioData.setToday(isday);
 			LogUtils.d("radiodata===>" + radioData.toString());
 			this.radioData.add(radioData);
 
@@ -376,50 +416,151 @@ public class MyView extends View implements Checkable {
 
 	}
 
+
+	public int getImageOffset() {
+		LogUtils.d("MainActivity","criY===>"+criceY);
+		return (int) criceY;
+	}
+
 	private void drawVacany(Canvas canvas) {
+
+
+		String hour = getWayHour();
+		LogUtils.d("hor===>" + hour);
+		int index = -1;
+		for (int i = 0; i < hourList.size(); i++) {
+			if (hour.equals(hourList.get(i))) {
+				index = i;
+				break;
+			}
+		}
+		if (index == -1) {
+			return;
+		}
+		LogUtils.d("hor===>" + index);
+
+		int startIndex = index - 4;
+		int endIndex = index + 4;
+
 		canvas.drawCircle(criceX, criceY + 40, vacanyRadios, paint);
+
+
+		float ange = 90 - (vacanyAnge * 4 + vacanyAnge / 2);
+
+
+		final float set = vacanyAnge;
 		//22.5
-		float ange = 22.5f;
+
 		float v = extenrlRadios * 2 - width;
-		float top = criceY + 40 - extenrlRadios+30;
+		float top = criceY + 40 - extenrlRadios + 30;
 		float right = width + v / 2;
-		float bootom = criceY + 40 + extenrlRadios+30;
+		float bootom = criceY + 40 + extenrlRadios + 30;
 		RectF rectF = new RectF(-v / 2, top, right, bootom);
 		float v3 = textPaint.measureText("巳时");
 		float textange = (float) (180 * v3 / (PI * (extenrlRadios)));
-		for (int i = 1; i <= 10; i++) {
+		for (int i = endIndex; i >= startIndex - 1; i--) {
+
 			float x = getRaidoX(extenrlRadios, ange);
 			float y = getVanRaidoY(extenrlRadios, ange);
 			float endX = getRaidoX(vacanyRadios, ange);
 			float endY = getVanRaidoY(vacanyRadios, ange);
-			if (endX > 0 && endX < width) {
+
+			drawHorPath(canvas, index, ange, set, i, x, y, endX, endY);
+			if (endX > -100 && endX < width + 100) {
 				canvas.drawLine(x, y, endX, endY, paint);
-				if (getRaidoX(vacanyRadios, ange + 15f) > 0 && getRaidoX(vacanyRadios, ange + 15f) < width) {
+				if (getRaidoX(vacanyRadios, ange + set) > -100 && getRaidoX(vacanyRadios, ange + set) < width + 100 && i != endIndex + 1) {
+					String message = "";
+					if (i >= hourList.size()) {
+						/**
+						 * 12 - 12 = 0
+						 */
+						message = hourList.get(i - hourList.size());
+					} else if (i >= startIndex) {
+						message = hourList.get(i);
+					}
 					Rect rect = new Rect();
 					//计算文字的宽高
-					textPaint.getTextBounds("巳时", 0, "巳时".length(), rect);
+					textPaint.getTextBounds(message, 0, message.length(), rect);
 					/**
 					 *  内圆半径+偏移量+文字高度+文字偏移量/2
 					 *  计算x轴和y轴
 					 *  基于文字的外接圆
 					 */
-					float raidoX = getRaidoX( extenrlRadios+vacanyOffset/2, ange+10f);
-					float raidoY = getVanRaidoY(extenrlRadios+vacanyOffset/2, ange+10f);
-					if(ange>90){
-						raidoY+=rect.height();
+					float raidoX = getRaidoX(extenrlRadios + vacanyOffset / 2, ange + 10f);
+					float raidoY = getVanRaidoY(extenrlRadios + vacanyOffset / 2, ange + 10f);
+					if (ange > 90) {
+						raidoY += rect.height();
 					}
 					Path path = new Path();
 					LogUtils.d("endx===>" + endX + "---endY===>" + endY);
-					path.addArc(rectF, ange+5, textange);
-					canvas.drawText("巳时", raidoX,raidoY, textPaint);
+					path.addArc(rectF, ange + 5, textange);
+					canvas.drawText(message, raidoX, raidoY, textPaint);
 				}
 
 			}
 
 
-			ange += 15f;
+			ange += set;
 		}
 
+
+	}
+
+	private void drawHorPath(Canvas canvas, int index, float ange, float set, int i, float x, float y, float endX, float endY) {
+		if (i == index) {
+			Path path = new Path();
+			path.moveTo(x, y);
+			path.lineTo(endX, endY);
+			RectF rectF1 = new RectF(criceX - vacanyRadios, criceY + 40 - vacanyRadios, criceX + vacanyRadios, criceY + 40 + vacanyRadios);
+			path.arcTo(rectF1, ange, set);
+			path.lineTo(getRaidoX(extenrlRadios, ange + set), getVanRaidoY(extenrlRadios, ange + set));
+			RectF rectF2 = new RectF(criceX - extenrlRadios, criceY + 40 - extenrlRadios, criceX + extenrlRadios, criceY + 40 + extenrlRadios);
+			path.arcTo(rectF2, ange + set, -set);
+//						path.close();
+			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+			paint.setColor(Color.RED);
+			canvas.drawPath(path, paint);
+
+			region = pointInPath(path);
+
+
+		}
+	}
+
+	private String getWayHour() {
+		String hor = "";
+		SimpleDateFormat format = new SimpleDateFormat("HH");
+		int wayHor = Integer.parseInt(format.format(new Date(System.currentTimeMillis())));
+
+		LogUtils.d("hor===>" + wayHor);
+
+		if (wayHor >= 1 && wayHor < 3) {
+			hor = "丑时";
+		} else if (wayHor >= 3 && wayHor < 5) {
+			hor = "寅时";
+		} else if (wayHor >= 5 && wayHor < 7) {
+			hor = "卯时";
+		} else if (wayHor >= 7 && wayHor < 9) {
+			hor = "辰时";
+		} else if (wayHor >= 9 && wayHor < 11) {
+			hor = "巳时";
+		} else if (wayHor >= 11 && wayHor < 13) {
+			hor = "午时";
+		} else if (wayHor >= 13 && wayHor < 15) {
+			hor = "未时";
+		} else if (wayHor >= 15 && wayHor < 17) {
+			hor = "申时";
+		} else if (wayHor >= 17 && wayHor < 19) {
+			hor = "酉时";
+		} else if (wayHor >= 19 && wayHor < 21) {
+			hor = "戊时";
+		} else if (wayHor >= 21 && wayHor < 23) {
+			hor = "亥时";
+		} else if (wayHor >= 23 || wayHor < 1) {
+			hor = "子时";
+		}
+
+		return hor;
 
 	}
 
@@ -451,6 +592,7 @@ public class MyView extends View implements Checkable {
 		float x = (float) (criceX + radios * Math.cos(ange * PI / 180));
 		return x;
 	}
+
 	/**
 	 * 获取圆内一点的x点
 	 *
@@ -484,9 +626,14 @@ public class MyView extends View implements Checkable {
 	public boolean onTouchEvent(MotionEvent event) {
 		float x = event.getX();
 		float y = event.getY();
+
+		if ((region != null) && region.contains((int) x, (int) y) && listener != null) {
+			listener.onTimeClick();
+			return true;
+		}
+
 		double alfa = 0;
 		float startArc = 0;
-
 		double distance = Math.pow(x - criceX, 2) + Math.pow(y - criceY, 2);
 		if (distance < Math.pow(aFloat, 2) && distance > Math.pow(radios, 2)) {
 			float xradios = radios + 20;
@@ -510,11 +657,17 @@ public class MyView extends View implements Checkable {
 				RadioData radioData = this.radioData.get(i1);
 				if (!radioData.isFlag()) {
 					if (radioData.getStartAnge() < alfa && alfa < radioData.getEndAnage()) {
+						if (listener != null) {
+							listener.onClick(radioData.getContent(), radioData.getPosition(), radioData.isToday());
+						}
 						ToastUtils.showShort(radioData.getContent());
 						return true;
 					}
 				} else {
 					if (radioData.getStartAnge() < alfa || alfa < radioData.getEndAnage()) {
+						if (listener != null) {
+							listener.onClick(radioData.getContent(), radioData.getPosition(), radioData.isToday());
+						}
 						ToastUtils.showShort(radioData.getContent());
 						return true;
 					}
@@ -657,6 +810,9 @@ public class MyView extends View implements Checkable {
 		private float endAnage;
 		private String content;
 
+		private boolean isToday;
+		private int position;
+
 		private boolean flag;
 
 		public boolean isFlag() {
@@ -697,16 +853,48 @@ public class MyView extends View implements Checkable {
 			this.content = content;
 		}
 
+		public boolean isToday() {
+			return isToday;
+		}
+
+		public void setToday(boolean today) {
+			isToday = today;
+		}
+
+		public int getPosition() {
+			return position;
+		}
+
+		public void setPosition(int position) {
+			this.position = position;
+		}
+
 		@Override
 		public String toString() {
 			return "RadioData{" +
 					"startAnge=" + startAnge +
 					", endAnage=" + endAnage +
 					", content='" + content + '\'' +
+					", isToday=" + isToday +
+					", position=" + position +
 					", flag=" + flag +
 					'}';
 		}
 	}
 
+	private Region pointInPath(Path path) {
+		RectF bounds = new RectF();
+		path.computeBounds(bounds, true);
+		Region region = new Region();
+		region.setPath(path, new Region((int) bounds.left, (int) bounds.top, (int) bounds.right, (int) bounds.bottom));
+		return region;
+	}
+
+	public interface CircleClickListener {
+
+		void onClick(String message, int position, boolean today);
+
+		void onTimeClick();
+	}
 
 }
