@@ -48,7 +48,7 @@
 			app:themeColor="#fff"
 			app:vacanyOffset="40dp"
 			app:vacanyAnge="13"
-			app:vacanyStartAnge="20"
+
 			></com.gameplayer.mycriceview.CircleView>
 
 		<ImageView
