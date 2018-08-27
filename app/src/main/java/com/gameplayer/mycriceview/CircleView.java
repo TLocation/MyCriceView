@@ -61,6 +61,9 @@ public class CircleView extends View implements Checkable {
 
 
 
+	private int timeClickColor;
+
+
 	private int criceOffset;
 	private int lineOffset;
 	private int textOffset;
@@ -184,6 +187,8 @@ public class CircleView extends View implements Checkable {
 		criceOffset = typedArray.getDimensionPixelSize(R.styleable.CriceView_criceOffset, 50);
 		vacanyOffset = typedArray.getDimensionPixelSize(R.styleable.CriceView_vacanyOffset, 50);
 		vacanyAnge = typedArray.getFloat(R.styleable.CriceView_vacanyAnge, 14f);
+		timeClickColor = typedArray.getColor(R.styleable.CriceView_timeClickColor,Color.RED);
+
 		typedArray.recycle();
 
 	}
@@ -514,7 +519,7 @@ public class CircleView extends View implements Checkable {
 			path.arcTo(rectF2, ange + set, -set);
 //						path.close();
 			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			paint.setColor(Color.RED);
+			paint.setColor(Color.BLUE);
 			canvas.drawPath(path, paint);
 
 			region = pointInPath(path);
@@ -778,17 +783,25 @@ public class CircleView extends View implements Checkable {
 		radios = radios - allOffset - contentWith;
 
 		float v = vacanyRadios * 2 + 40 + top + bottom;
+     if(heightModle!=MeasureSpec.UNSPECIFIED){
+		 while (v > heightSize) {
+			 vacanyRadios -= 5;
+			 extenrlRadios -= 5;
+			 v = vacanyRadios * 2 + 40 + top + bottom;
+		 }
+	 }
 
-		while (v > heightSize) {
-			vacanyRadios -= 5;
-			extenrlRadios -= 5;
-			v = vacanyRadios * 2 + 40 + top + bottom;
-		}
 
 		if (heightModle == MeasureSpec.AT_MOST) {
+			LogUtils.d("type==>1");
 			setMeasuredDimension(widthSize, (int) v);
 		} else if (heightModle == MeasureSpec.EXACTLY) {
+			LogUtils.d("type==>2");
 			setMeasuredDimension(widthSize, heightSize);
+		}else if(heightModle == MeasureSpec.UNSPECIFIED){
+
+			LogUtils.d("type==>3");
+			setMeasuredDimension(widthSize, (int) v);
 		}
 //		switch (widthModle) {
 //			case MeasureSpec.AT_MOST:

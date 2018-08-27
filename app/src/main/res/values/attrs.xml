@@ -26,7 +26,8 @@
 		<!--最外面带轮廓圆的半径  = 宽的一半+criceoffset+vacanyOffset-->
 		<attr name="vacanyOffset" format="dimension" />
 		<!--最外圆的间距-->
-		<attr name="vacanyAnge" format="float"/>
+		<attr name="vacanyAnge" format="float" />
+		<attr name="timeClickColor" format="color" />
 
 	</declare-styleable>
 </resources>
