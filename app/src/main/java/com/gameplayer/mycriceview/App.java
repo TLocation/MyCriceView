@@ -10,8 +10,6 @@ import android.app.Application;
  */
 
 public class App extends Application {
-
-	//https://www.cnblogs.com/linux007/p/5785046.html
 	@Override
 	public void onCreate() {
 		super.onCreate();
